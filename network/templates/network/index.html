@@ -1,0 +1,67 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+    <h2>All Posts</h2>
+
+    {% if user.is_authenticated %}
+        <div class="new_post mb-4">
+            <form action="{% url 'index' %}" method="post">
+                {% csrf_token %}
+                <textarea name="content" class="form-control" placeholder="What's on your mind?" rows="3"></textarea>
+                <button type="submit" class="btn btn-primary mt-2">Post</button>
+            </form>
+        </div>
+    {% else %}
+        <p>You must be logged in to post</p>
+    {% endif %}
+
+    <div class="posts">
+        {% for post in posts %}
+            <div class="post card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ post.user }}</h5>
+                    {% if user == post.user %}
+                        <button class="btn btn-sm btn-warning edit-btn" data-post-id="{{ post.id }}">Edit</button>
+                    {% endif %}
+                    <p class="post-content card-text">{{ post.content }}</p>
+                    <small class="text-muted">{{ post.timestamp }}</small>
+                    <br>
+                    {% if user.is_authenticated %}
+                        <button class="btn btn-primary like-btn" data-post-id="{{ post.id }}">
+                            {% if post.id in liked_posts %}
+                                Unlike
+                            {% else %}
+                                Like
+                            {% endif %}
+                        </button>
+                    {% endif %}
+                    <span id="like-count-{{ post.id }}" style="text-align: left;">{{ post.likes.count }}</span> Likes
+                </div>
+            </div>
+
+            {% empty %}
+                <p>No posts yet</p>
+            {% endfor %}
+    </div> 
+
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if posts.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1">&laquo; First</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ posts.previous_page_number }}">Previous</a></li>
+            {% endif %}
+
+            <li class="page-item disabled"><a class="page-link">Page {{ post.number }} of {{ post.paginator.num_pages }}</a></li>
+
+            {%if posts.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ posts.next_page_number }}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ posts.paginator.num_pages }}">Last &raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <script src="{% static 'network/like_post.js' %}"></script>
+
+{% endblock %}
