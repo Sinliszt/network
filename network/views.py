@@ -29,7 +29,7 @@ def index(request):
 
     if request.user.is_authenticated:
         liked_posts = Post.objects.filter(likes=request.user).values_list("id", flat=True)
-        
+
     return render(request, "network/index.html", {
         "page_object": page_object,
         "posts": posts,
@@ -143,6 +143,10 @@ def follow(request,username):
 
 @login_required
 def edit_post(request, post_id):
+
+    if not request.user.is_authenticated:
+        return redirect('login')
+        
     if request.method == "PUT":
         try:
             data = json.loads(request.body)
@@ -188,7 +192,16 @@ def follow_view(request):
     following_users = Follow.objects.filter(follower=request.user).values_list("following", flat=True)
 
     posts = Post.objects.filter(user__id__in=following_users).order_by("-timestamp")
+    paginator=Paginator(posts,10)
+    page_number = request.GET.get("page")
+    page_object = paginator.get_page(page_number)
+    liked_posts = []
+
+    if request.user.is_authenticated:
+        liked_posts = Post.objects.filter(likes=request.user).values_list("id", flat=True)
 
     return render(request, "network/following.html", {
-        "posts": posts
+        "posts": posts,
+        "page_object": page_object,
+        "liked_posts": liked_posts,
     })

@@ -20,11 +20,25 @@
     <h3>Posts</h3>
 
     {% for post in page_object %}
-        <div class="card mb-3">
+        <div class="post card mb-3">
             <div class="card-body">
                 <h5 class="card-title">{{ post.user }}</h5>
-                <p class="card-text">{{ post.content }}</p>
+                {% if user == post.user %}
+                    <button class="btn btn-sm btn-warning edit-btn" data-post-id="{{ post.id }}">Edit</button>
+                {% endif %}
+                <p class="post-content card-text">{{ post.content }}</p>
                 <small class="text-muted">{{ post.timestamp }}</small>
+                <br>
+                {% if user.is_authenticated %}
+                    <button class="btn btn-primary like-btn" data-post-id="{{ post.id }}">
+                        {% if post.id in liked_posts %}
+                            Unlike
+                        {% else %}
+                            Like
+                        {% endif %}
+                    </button>
+                {% endif %}
+                <span id="like-count-{{ post.id }}" style="text-align: left;">{{ post.likes.count }}</span> Likes
             </div>
         </div>
     {% empty %}
