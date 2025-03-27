@@ -1,0 +1,61 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}    
+    <h2>{{ user_profile.username }}'s Profile</h2>
+
+    <p><strong>Follower Count: </strong><span id="followers-count">{{ followers }}</span></p>
+    <p><strong>Following: </strong>{{ following }}</p>
+
+    {% if user.is_authenticated and user != user_profile %}
+        <button id="follow-btn" data-username="{{ user_profile.username }}" class="btn {% if is_following %}btn-danger{% else %}btn-primary{% endif %}">
+            {% if is_following%}
+                Unfollow
+            {% else %}
+                Follow
+            {% endif %}
+        </button>
+    {% endif %}
+
+    <h3>Posts</h3>
+
+    {% for post in page_object %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ post.user }}</h5>
+                <p class="card-text">{{ post.content }}</p>
+                <small class="text-muted">{{ post.timestamp }}</small>
+            </div>
+        </div>
+    {% empty %}
+        <p>No posts yet</p>
+    {% endfor %}
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_object.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_object.previous_page_number }}">Previous</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <a class="page-link">Page {{ page_object.number }} of {{ page_object.paginator.num_pages }}</a>
+            </li>
+
+            {% if page_object.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_object.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_object.paginator.num_pages }}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <script src="{% static 'network/profile.js' %}"></script>
+{% endblock %}
